@@ -91,7 +91,7 @@ class FunctionIdentificationDataset(data.Dataset):
 
     def _get_padded_data(self, data, idx, block_size, padding_amount):
         left_padding_amount = int(padding_amount / 2)
-        right_padding_amount = padding_amount - left_padding
+        right_padding_amount = padding_amount - left_padding_amount
 
         left_padding = numpy.array([FILE_START] * (left_padding_amount - idx), dtype=int)
         right_padding = numpy.array([FILE_END] * (right_padding_amount - max(data.size - idx - block_size, 0)), dtype=int)
