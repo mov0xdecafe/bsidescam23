@@ -11,14 +11,19 @@ lief.logging.set_level(lief.logging.LOGGING_LEVEL.CRITICAL)
 
 class FunctionIdentificationDataset(data.Dataset):
     """Generates the dataset for processing by the CNN"""
-    def __init__(self, root):
-        self._preprocess(root)
-        
+    def __init__(self, root, block_size, padding_amount):
+        data, features = self._preprocess(root)
+        self.data_blocks, self.feature_blocks = self._data_to_blocks(data, features, block_size, padding_amount)
+
+    def __len__(self):
+        return len(self.data_blocks)
+    
+    def __getitem__(self, idx):
+        return self.data_blocks[idx], self.feature_blocks[idx]
         
     def _preprocess(self, root: str):
-        bins_paths = []
         bins_data = []
-        bins_tags = []
+        bins_features = []
 
         # recursively walk from the root directory and create a list of every file encountered
         all_files = [os.path.join(dirpath, file) 
@@ -33,6 +38,11 @@ class FunctionIdentificationDataset(data.Dataset):
                 continue
             data = self._get_code(bin)
             features = self._generate_features(bin)
+
+            bins_data.append(data)
+            bins_features.append(data)
+        
+        return bins_data, bins_features
 
     def _get_code(self, bin: lief._lief.ELF.Binary):
         """Return the code (.text) section from the indicated binary"""
@@ -67,3 +77,25 @@ class FunctionIdentificationDataset(data.Dataset):
 
         return features
 
+    def _data_to_blocks(self, data: list, features: list, block_size: int, padding_amount: int):
+        data_blocks = []
+        feature_blocks = []
+
+        for bin_data, bin_features in zip(data, features):
+            for start_idx in range(0, len(bin_data), block_size):
+                block_end_offset = start_idx+block_size
+                data_blocks.append(self._get_padded_data(bin_data, start_idx, block_size, padding_amount))
+                feature_blocks.append(bin_features[start_idx:block_end_offset])
+        
+        return data_blocks,feature_blocks
+
+    def _get_padded_data(self, data, idx, block_size, padding_amount):
+        left_padding_amount = int(padding_amount / 2)
+        right_padding_amount = padding_amount - left_padding
+
+        left_padding = numpy.array([FILE_START] * (left_padding_amount - idx), dtype=int)
+        right_padding = numpy.array([FILE_END] * (right_padding_amount - max(data.size - idx - block_size, 0)), dtype=int)
+
+        block = data[max(idx - left_padding_amount, 0) : idx + block_size + right_padding_amount]
+
+        return numpy.concatenate(left_padding, block, right_padding)

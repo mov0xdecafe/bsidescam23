@@ -8,5 +8,7 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
+    kernel_size = 20
+
     print("Function Boundary Identification")
-    dataset = FunctionIdentificationDataset(args.dataset_path)
+    dataset = FunctionIdentificationDataset(args.dataset_path, block_size=1000, padding_amount=kernel_size-1)
