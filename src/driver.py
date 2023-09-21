@@ -85,12 +85,12 @@ if __name__ == "__main__":
     dataset = FunctionIdentificationDataset(args.dataset_path, block_size=1000, padding_amount=KERNEL_SIZE-1)
 
     # Split the dataset into training and test sets
-    train_size = int(len(dataset) * 0.9)
+    train_size = int(len(dataset) * 0.7)
     test_size = len(dataset) - train_size
     training_dataset, test_dataset = data.random_split(dataset, [train_size, test_size])
 
     # Create the CNN model
-    model = CNNModel(vocab_size=258, embedding_dim=64, hidden_dim=16, kernel_size=KERNEL_SIZE, featureset_size=2)
+    model = CNNModel(vocab_size=258, embedding_dim=64, hidden_dim=16, kernel_size=KERNEL_SIZE, featureset_size=3)
 
     print("[*] Training Model")
     train_model(model, training_dataset)

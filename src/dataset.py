@@ -103,6 +103,7 @@ class FunctionIdentificationDataset(data.Dataset):
         excluded_symbols = ["_fini", "_init"] 
 
         start_addrs = []
+        end_addrs = []
 
         for symbol in bin.symbols:
             if symbol.name in excluded_symbols:
@@ -110,6 +111,7 @@ class FunctionIdentificationDataset(data.Dataset):
             if symbol.type == lief.ELF.SYMBOL_TYPES.FUNC and symbol.value != 0:
                 relative_address = symbol.value - text_section.virtual_address
                 start_addrs.append((relative_address, symbol.name))
+                end_addrs.append((relative_address + symbol.size, symbol.name)) 
         
         features = numpy.zeros(text_section.size, dtype=int)
         
@@ -117,7 +119,13 @@ class FunctionIdentificationDataset(data.Dataset):
             if addr >= text_section.size:
                 print(f"[!] Warning: Address {addr} (from symbol {symbol_name}) is out of bounds for the .text section.")
             else:
-                features[addr] = 1
+                features[addr] = 1 # 1 denotes the start of a function
+
+        for addr, symbol_name in end_addrs:
+            if addr >= text_section.size:
+                print(f"[!] Warning: Address {addr} (from symbol {symbol_name}) is out of bounds for the .text section.")
+            else:
+                features[addr] = 2  # 2 denotes the end of a function
 
         return features
 
