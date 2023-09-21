@@ -64,9 +64,9 @@ def test_model(model, test_dataset):
 
         # Calculate and print evaluation metrics
         accuracy = accuracy_score(all_features, all_feature_scores)
-        pr = precision_score(all_features, all_feature_scores)
-        recall = recall_score(all_features, all_feature_scores)
-        f1 = f1_score(all_features, all_feature_scores)
+        pr = precision_score(all_features, all_feature_scores, average='macro')
+        recall = recall_score(all_features, all_feature_scores, average='macro')
+        f1 = f1_score(all_features, all_feature_scores, average='macro')
 
         print("accuracy: {}".format(accuracy))
         print("precision: {}".format(pr))

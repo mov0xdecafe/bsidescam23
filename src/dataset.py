@@ -118,14 +118,14 @@ class FunctionIdentificationDataset(data.Dataset):
         for addr, symbol_name in start_addrs:
             if addr >= text_section.size:
                 print(f"[!] Warning: Address {addr} (from symbol {symbol_name}) is out of bounds for the .text section.")
-            else:
-                features[addr] = 1 # 1 denotes the start of a function
+                continue
+            features[addr] = 1 # 1 denotes the start of a function
 
         for addr, symbol_name in end_addrs:
             if addr >= text_section.size:
                 print(f"[!] Warning: Address {addr} (from symbol {symbol_name}) is out of bounds for the .text section.")
-            else:
-                features[addr] = 2  # 2 denotes the end of a function
+                continue
+            features[addr] = 2  # 2 denotes the end of a function
 
         return features
 
